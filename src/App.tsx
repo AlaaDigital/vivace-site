@@ -253,9 +253,26 @@ export default function App() {
     toastTimer.current = window.setTimeout(() => setToast(null), 4200);
   };
 
-  /* load data */
+  /* load data - FIXED: KV first */
   const loadAll = async () => {
     try {
+      // 1. Try KV first (global for all users)
+      const kvData = await loadFromKV();
+      if (kvData && Object.keys(kvData).length > 0) {
+        const merged = { ...DEFAULT_CONFIG, ...kvData };
+        setConfig(merged);
+        if (!themeTouched) setTheme(merged.appearance.defaultTheme === "dark" ? "dark" : "light");
+        setStoreStatus("Cloudflare KV connected ✓ - يظهر للكل");
+        // Load local fallback for bookings/entries
+        try {
+          const bk = (await api("records.list", { collection: "bookings", limit: 100 })) as { records: { id: string; value: Booking }[] };
+          setBookings(bk.records.map((r) => ({ ...r.value, id: r.id })));
+          const en = (await api("records.list", { collection: "entries", limit: 100 })) as { records: { id: string; value: Entry }[] };
+          setEntries(en.records.map((r) => ({ ...r.value, id: r.id })).reverse());
+        } catch {}
+        return;
+      }
+      // 2. Fallback to old records API (localStorage)
       const cfgRes = (await api("records.list", { collection: "config", limit: 1 })) as { records: { id: string; value: Config }[] };
       if (cfgRes.records.length > 0) {
         const merged = { ...DEFAULT_CONFIG, ...cfgRes.records[0].value };
