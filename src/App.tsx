@@ -9,13 +9,36 @@ import {
 
 /* ---------------------------------- types --------------------------------- */
 type Service = { name: string; desc: string; price: string; tag: string; color: string; image?: string };
-type ResultItem = { caption: string; sub: string; art: string; size: string; image?: string; beforeImage?: string; afterImage?: string };
+type ResultItem = { caption: string; sub: string; art: string; size: string; image?: string; beforeImage?: string };
 type Post = { title: string; date: string; excerpt: string; content: string; art: string; image?: string };
 type Booking = { id?: string; name: string; service: string; phone: string; date: string; status: string; finalDate: string; finalTime: string; notes: string };
-type Entry = { id?: string; name: string; handle: string; at: string };
+type Entry = { id?: string; name: string; handle: string; at: string; steps?: any };
+
+type CompetitionRequirement = {
+  id: string;
+  type: "follow_ig" | "follow_fb" | "follow_snap" | "like_post" | "comment" | "share" | "tag_friends";
+  label: string;
+  enabled: boolean;
+  url?: string;
+  keyword?: string;
+  count?: number;
+};
 
 type Config = {
   bar: { active: boolean; message: string; linkText: string; linkUrl: string };
+  general: { whatsapp: string; instagram: string; facebook: string; snapchat: string; address: string };
+  hero: { kicker: string; titleA: string; titleAccent: string; titleB: string; subtitle: string; art: string; image?: string; statA: string; statALabel: string; statB: string; statBLabel: string; statC: string; statCLabel: string };
+  services: Service[];
+  results: ResultItem[];
+  posts: Post[];
+  comp: { 
+    title: string; desc: string; endDate: string; prizeArt: string; prizeImage?: string; wins: string; winnerText: string; likeCount: number;
+    isActive: boolean;
+    requirements: CompetitionRequirement[];
+  };
+  seo: { title: string; description: string; keywords: string; canonical: string };
+  appearance: { defaultTheme: string; rose: string; gold: string };
+};
   general: { whatsapp: string; instagram: string; facebook: string; snapchat: string; address: string };
   hero: { kicker: string; titleA: string; titleAccent: string; titleB: string; subtitle: string; art: string; statA: string; statALabel: string; statB: string; statBLabel: string; statC: string; statCLabel: string };
   services: Service[];
@@ -46,34 +69,44 @@ const DEFAULT_CONFIG: Config = {
     art: "rose", statA: "3.4K+", statALabel: "Happy clients", statB: "346", statBLabel: "Five-star reviews", statC: "4.9", statCLabel: "Average rating",
   },
   services: [
-    { name: "Signature Lip Filler", desc: "Our iconic balanced lip enhancement, tailored to your facial harmony.", price: "From $449", tag: "Most loved", color: "rose", image: "" },
-    { name: "Skin Boosters", desc: "Deep hydration that restores glow, elasticity and that lit-from-within finish.", price: "From $299", tag: "Glow", color: "gold", image: "" },
-    { name: "Anti-Wrinkle", desc: "Precise, softening treatments that keep expression — never frozen.", price: "From $12/unit", tag: "Refine", color: "noir", image: "" },
-    { name: "Dermal Filler", desc: "Sculpt, contour and restore volume with a feather-light touch.", price: "From $549", tag: "Sculpt", color: "sunset", image: "" },
-    { name: "Fat Dissolving", desc: "Target stubborn pockets for a cleaner, more defined profile.", price: "From $399", tag: "Define", color: "sage", image: "" },
-    { name: "Luxury Facial Ritual", desc: "A 90-minute restorative ritual: cleanse, sculpt, infuse, illuminate.", price: "From $189", tag: "Ritual", color: "pearl", image: "" },
+    { name: "Signature Lip Filler", desc: "Our iconic balanced lip enhancement, tailored to your facial harmony.", price: "From $449", tag: "Most loved", color: "rose" },
+    { name: "Skin Boosters", desc: "Deep hydration that restores glow, elasticity and that lit-from-within finish.", price: "From $299", tag: "Glow", color: "gold" },
+    { name: "Anti-Wrinkle", desc: "Precise, softening treatments that keep expression — never frozen.", price: "From $12/unit", tag: "Refine", color: "noir" },
+    { name: "Dermal Filler", desc: "Sculpt, contour and restore volume with a feather-light touch.", price: "From $549", tag: "Sculpt", color: "sunset" },
+    { name: "Fat Dissolving", desc: "Target stubborn pockets for a cleaner, more defined profile.", price: "From $399", tag: "Define", color: "sage" },
+    { name: "Luxury Facial Ritual", desc: "A 90-minute restorative ritual: cleanse, sculpt, infuse, illuminate.", price: "From $189", tag: "Ritual", color: "pearl" },
   ],
   results: [
-    { caption: "Signature Lips · 1ml", sub: "Healed, week two", art: "rose", size: "tall", image: "" },
-    { caption: "Skin Booster Glow", sub: "After two sessions", art: "pearl", size: "wide", image: "" },
-    { caption: "Lip Definition", sub: "Cupid's bow refinement", art: "sunset", size: "tall", image: "" },
-    { caption: "Profile Balance", sub: "Chin + lips harmony", art: "gold", size: "wide", image: "" },
-    { caption: "Natural Volume", sub: "First-time client", art: "rose", size: "tall", image: "" },
-    { caption: "Radiance Ritual", sub: "Post-facial glow", art: "sage", size: "wide", image: "" },
+    { caption: "Signature Lips · 1ml", sub: "Healed, week two", art: "rose", size: "tall" },
+    { caption: "Skin Booster Glow", sub: "After two sessions", art: "pearl", size: "wide" },
+    { caption: "Lip Definition", sub: "Cupid's bow refinement", art: "sunset", size: "tall" },
+    { caption: "Profile Balance", sub: "Chin + lips harmony", art: "gold", size: "wide" },
+    { caption: "Natural Volume", sub: "First-time client", art: "rose", size: "tall" },
+    { caption: "Radiance Ritual", sub: "Post-facial glow", art: "sage", size: "wide" },
   ],
   posts: [
-    { title: "The Art of the Natural Lip", date: "2026-06-12", excerpt: "Why the most beautiful lips are the ones nobody can quite put their finger on.", content: "Natural lip enhancement is a study in restraint. At Vivace we map your facial thirds first, then build volume in whisper-thin layers so the result moves, smiles and settles like it was always yours. Hydration, border definition and symmetry do more for beauty than size ever will.", art: "rose", image: "" },
-    { title: "Skin Boosters, Explained", date: "2026-06-28", excerpt: "The glow treatment our clients book on repeat — what it does and who it suits.", content: "Skin boosters are micro-injections of hydrating gel that work like an internal moisturiser. Over two to three sessions, skin becomes plumper, light reflects more evenly, and makeup sits beautifully. It is the quiet luxury of skincare: invisible work, visible radiance.", art: "gold", image: "" },
-    { title: "Your First Appointment, Step by Step", date: "2026-07-09", excerpt: "From consultation to aftercare — exactly what to expect at Vivace Clinic.", content: "Every Vivace journey begins with a consultation. We listen first: your goals, your concerns, your timeline. Treatment is gentle and unhurried, and you leave with a personalised aftercare plan and our direct line for any question, day or night.", art: "pearl", image: "" },
+    { title: "The Art of the Natural Lip", date: "2026-06-12", excerpt: "Why the most beautiful lips are the ones nobody can quite put their finger on.", content: "Natural lip enhancement is a study in restraint. At Vivace we map your facial thirds first, then build volume in whisper-thin layers so the result moves, smiles and settles like it was always yours. Hydration, border definition and symmetry do more for beauty than size ever will.", art: "rose" },
+    { title: "Skin Boosters, Explained", date: "2026-06-28", excerpt: "The glow treatment our clients book on repeat — what it does and who it suits.", content: "Skin boosters are micro-injections of hydrating gel that work like an internal moisturiser. Over two to three sessions, skin becomes plumper, light reflects more evenly, and makeup sits beautifully. It is the quiet luxury of skincare: invisible work, visible radiance.", art: "gold" },
+    { title: "Your First Appointment, Step by Step", date: "2026-07-09", excerpt: "From consultation to aftercare — exactly what to expect at Vivace Clinic.", content: "Every Vivace journey begins with a consultation. We listen first: your goals, your concerns, your timeline. Treatment is gentle and unhurried, and you leave with a personalised aftercare plan and our direct line for any question, day or night.", art: "pearl" },
   ],
   comp: {
     title: "The Vivace Glow Giveaway",
-    desc: "One lucky winner receives the full Vivace experience. Follow the three steps below to enter — it takes less than a minute.",
+    desc: "One lucky winner receives the full Vivace experience. Complete the steps below to enter — it takes less than a minute.",
     endDate: "2026-08-31T23:59",
     prizeArt: "gold",
+    prizeImage: "",
     wins: "Signature Lip Filler session\nSkin Booster treatment\nLuxury Facial Ritual\n$200 Vivace product credit",
     winnerText: "Winner announced here and on our Instagram on 1 September. Good luck, beauties.",
     likeCount: 1284,
+    isActive: true,
+    requirements: [
+      { id: "req_ig", type: "follow_ig", label: "Follow us on Instagram", enabled: true, url: "https://instagram.com" },
+      { id: "req_fb", type: "follow_fb", label: "Follow us on Facebook", enabled: true, url: "https://facebook.com" },
+      { id: "req_like", type: "like_post", label: "Like the giveaway post", enabled: true, url: "https://instagram.com" },
+      { id: "req_comment", type: "comment", label: "Leave a comment", enabled: false, keyword: "VIVACE" },
+      { id: "req_share", type: "share", label: "Share to story", enabled: false, url: "" },
+      { id: "req_tag", type: "tag_friends", label: "Tag friends", enabled: false, count: 2 },
+    ]
   },
   seo: {
     title: "Vivace Clinic Sydney | Lip Filler, Skin Boosters & Aesthetics",
@@ -113,16 +146,13 @@ async function api(action: string, args: Record<string, unknown>) {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || (data as { error?: string }).error) {
-      // Fallback to localStorage when deployed on static Pages (no actions endpoint -> 405)
       if (res.status === 405 || res.status === 404) {
-        console.warn("API not available, using localStorage fallback", action);
-        // Simulate success for config collection
+        // Static Pages fallback - use localStorage
+        const col = (args as any).collection;
         if (action === "records.list") {
-          const col = (args as any).collection;
           if (col === "config") {
             const cfg = safeLoad("vivace_config", null);
-            if (cfg) return { records: [{ id: "local-config", value: cfg }] };
-            return { records: [] };
+            return cfg ? { records: [{ id: "local-config", value: cfg }] } : { records: [] };
           }
           if (col === "bookings") {
             const bks = safeLoad("vivace_bookings", []);
@@ -134,46 +164,35 @@ async function api(action: string, args: Record<string, unknown>) {
           }
         }
         if (action === "records.create" || action === "records.replace") {
-          // Save to localStorage
-          const col = (args as any).collection;
+          const c = (args as any).collection;
           const val = (args as any).value;
-          if (col === "config") safeSave("vivace_config", val);
-          if (col === "bookings") {
-            const all = safeLoad("vivace_bookings", []);
-            all.push(val); safeSave("vivace_bookings", all);
-          }
-          if (col === "entries") {
-            const all = safeLoad("vivace_entries", []);
-            all.push(val); safeSave("vivace_entries", all);
-          }
+          if (c === "config") safeSave("vivace_config", val);
+          if (c === "bookings") { const all = safeLoad("vivace_bookings", []); all.push(val); safeSave("vivace_bookings", all); }
+          if (c === "entries") { const all = safeLoad("vivace_entries", []); all.push(val); safeSave("vivace_entries", all); }
           return { id: `local-${Date.now()}` };
         }
         if (action === "records.delete") return {};
-        throw new Error("Offline mode - saved locally");
+        throw new Error("OFFLINE_MODE");
       }
       throw new Error((data as { error?: string }).error || `Request failed (${res.status})`);
     }
     return (data as { data: unknown }).data;
   } catch (e) {
-    // Network error fallback
-    if (e instanceof Error && e.message.includes("Offline mode")) {
-      return { id: `local-${Date.now()}` };
-    }
-    // Try localStorage fallback for 405 already handled, otherwise rethrow but with nicer message
-    if (String(e).includes("Failed to fetch") || String(e).includes("405")) {
+    const msg = String(e);
+    if (msg.includes("OFFLINE_MODE") || msg.includes("Failed to fetch") || msg.includes("405")) {
       const col = (args as any)?.collection;
       if (action === "records.list" && col === "config") {
         const cfg = safeLoad("vivace_config", null);
-        if (cfg) return { records: [{ id: "local-config", value: cfg }] };
-        return { records: [] };
+        return cfg ? { records: [{ id: "local-config", value: cfg }] } : { records: [] };
       }
       if (action === "records.create" || action === "records.replace") {
-        const val = (args as any)?.value;
         const c = (args as any)?.collection;
+        const val = (args as any)?.value;
         if (c === "config") safeSave("vivace_config", val);
         return { id: `local-${Date.now()}` };
       }
-      throw new Error("Saved locally - Cloudflare Pages has no database, using browser storage");
+      if (action === "records.list") return { records: [] };
+      return { id: `local-${Date.now()}` };
     }
     throw e;
   }
@@ -248,7 +267,6 @@ export default function App() {
   const saveConfig = async (next: Config, silent = false) => {
     setSaving(true);
     try {
-      // Always save locally first - no 405
       safeSave("vivace_config", next);
       try {
         if (configId) {
@@ -257,10 +275,8 @@ export default function App() {
           const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string };
           setConfigId(created.id);
         }
-      } catch (apiErr) {
-        console.warn("API save fallback to localStorage", apiErr);
-      }
-      if (!silent) showToast("Saved ✓ - تم الحفظ محليا (ما عادش 405)");
+      } catch {}
+      if (!silent) showToast("Saved ✓ تم الحفظ");
     } catch (e) {
       safeSave("vivace_config", next);
       showToast("Saved locally ✓");
@@ -922,7 +938,7 @@ export default function App() {
             )}
 
             {tab === "services" && (
-              <AdminCard title={`Services (${config.services.length})`} action={<AddBtn onClick={() => saveNow({ services: [...config.services, { name: "New Service", desc: "Describe the treatment…", price: "From $", tag: "New", color: "rose", image: "" }] })} />}>
+              <AdminCard title={`Services (${config.services.length})`} action={<AddBtn onClick={() => saveNow({ services: [...config.services, { name: "New Service", desc: "Describe the treatment…", price: "From $", tag: "New", color: "rose" }] })} />}>
                 {config.services.map((s, i) => (
                   <div key={i} className="rounded-2xl border border-[var(--line)] p-4 space-y-3">
                     <div className="flex items-center gap-3">
@@ -935,11 +951,6 @@ export default function App() {
                       <input className={inputCls} value={s.price} placeholder="Price" onChange={(e) => { const n = [...config.services]; n[i] = { ...s, price: e.target.value }; update({ services: n }); }} onBlur={() => saveConfig(config, true)} />
                       <input className={inputCls} value={s.tag} placeholder="Tag" onChange={(e) => { const n = [...config.services]; n[i] = { ...s, tag: e.target.value }; update({ services: n }); }} onBlur={() => saveConfig(config, true)} />
                       <select className={inputCls} value={s.color} onChange={(e) => { const n = [...config.services]; n[i] = { ...s, color: e.target.value }; saveNow({ services: n }); }}>{ART_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
-                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)] col-span-3 mt-2">
-                        <ImageIcon size={14} /> {s.image ? "تغيير صورة الخدمة" : "رفع صورة الخدمة"}
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.services]; n[i] = { ...s, image: url }; saveNow({ services: n }); }); }} />
-                      </label>
-                      {s.image && <img src={s.image} className="w-full h-24 object-cover rounded-xl" />}
                     </div>
                   </div>
                 ))}
@@ -947,28 +958,22 @@ export default function App() {
             )}
 
             {tab === "results" && (
-              <AdminCard title="Before / After results - مع رفع الصور">
+              <AdminCard title="Before / After results">
                 {config.results.map((r, i) => (
                   <div key={i} className="rounded-2xl border border-[var(--line)] p-4 space-y-3">
-                    <div className={`grid grid-cols-2 rounded-xl overflow-hidden ${r.size === "tall" ? "h-28" : "h-20"}`}>
+                    <div className={`grid grid-cols-2 rounded-xl overflow-hidden border ${r.size === "tall" ? "h-32" : "h-24"}`} style={{ borderColor: "var(--line)" }}>
                       {r.beforeImage ? <img src={r.beforeImage} className="w-full h-full object-cover" /> : <div style={{ background: "linear-gradient(160deg,#efe6e0,#d9c6bb)" }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-[#6b5750]">BEFORE</div>}
                       {r.image ? <img src={r.image} className="w-full h-full object-cover" /> : <div style={{ background: ART[r.art] || ART.rose }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-black/50">AFTER</div>}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-[var(--muted)] uppercase">Before Photo</label>
-                        <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
-                          <ImageIcon size={14} /> {r.beforeImage ? "تغيير Before" : "رفع Before"}
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, beforeImage: url }; saveNow({ results: n }); }); }} />
-                        </label>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-[var(--muted)] uppercase">After Photo</label>
-                        <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
-                          <ImageIcon size={14} /> {r.image ? "تغيير After" : "رفع After"}
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, image: url }; saveNow({ results: n }); }); }} />
-                        </label>
-                      </div>
+                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
+                        <ImageIcon size={14} /> {r.beforeImage ? "تغيير Before" : "رفع Before"}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, beforeImage: url }; const nxt = { ...config, results: n }; setConfig(nxt); saveConfig(nxt, true); }); }} />
+                      </label>
+                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
+                        <ImageIcon size={14} /> {r.image ? "تغيير After" : "رفع After"}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, image: url }; const nxt = { ...config, results: n }; setConfig(nxt); saveConfig(nxt, true); }); }} />
+                      </label>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-3">
                       <input className={inputCls} value={r.caption} placeholder="Caption" onChange={(e) => { const n = [...config.results]; n[i] = { ...r, caption: e.target.value }; update({ results: n }); }} onBlur={() => saveConfig(config, true)} />
@@ -978,18 +983,14 @@ export default function App() {
                       <select className={inputCls} value={r.art} onChange={(e) => { const n = [...config.results]; n[i] = { ...r, art: e.target.value }; saveNow({ results: n }); }}>{ART_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
                       <select className={inputCls} value={r.size} onChange={(e) => { const n = [...config.results]; n[i] = { ...r, size: e.target.value }; saveNow({ results: n }); }}><option value="tall">Preview: Tall</option><option value="wide">Preview: Wide</option></select>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => { const n = [...config.results]; n[i] = { ...r, image: "", beforeImage: "" }; saveNow({ results: n }); }} className="text-xs text-red-400 flex items-center gap-1"><Trash2 size={12} /> حذف الصور</button>
-                    </div>
                   </div>
                 ))}
-                <AddBtn onClick={() => saveNow({ results: [...config.results, { caption: "New Result", sub: "After treatment", art: "rose", size: "tall", image: "", beforeImage: "" }] })} />
-                <p className="text-xs text-green-600 bg-green-50 p-3 rounded-xl">✓ تم تفعيل رفع الصور - ارفع Before و After الحقيقية. إذا ما رفعتش صورة، الـ gradient يبقى ظاهر.</p>
+                <p className="text-xs text-green-600 bg-green-50 p-3 rounded-xl">✓ رفع الصور مفعل - ارفع Before و After الحقيقية. إذا ما رفعتش صورة، الـ gradient يبقى.</p>
               </AdminCard>
             )}
 
             {tab === "blog" && (
-              <AdminCard title={`Blog posts (${config.posts.length})`} action={<AddBtn onClick={() => saveNow({ posts: [{ title: "New Journal Post", date: new Date().toISOString().slice(0, 10), excerpt: "A short teaser…", content: "Write your article here.", art: "rose", image: "" }, ...config.posts] })} />}>
+              <AdminCard title={`Blog posts (${config.posts.length})`} action={<AddBtn onClick={() => saveNow({ posts: [{ title: "New Journal Post", date: new Date().toISOString().slice(0, 10), excerpt: "A short teaser…", content: "Write your article here.", art: "rose" }, ...config.posts] })} />}>
                 {config.posts.map((p, i) => (
                   <div key={i} className="rounded-2xl border border-[var(--line)] p-4 space-y-3">
                     <div className="flex gap-3">
@@ -1002,21 +1003,77 @@ export default function App() {
                     </div>
                     <textarea rows={2} className={inputCls} placeholder="Excerpt" value={p.excerpt} onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, excerpt: e.target.value }; update({ posts: n }); }} onBlur={() => saveConfig(config, true)} />
                     <textarea rows={5} className={inputCls} placeholder="Full article content" value={p.content} onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, content: e.target.value }; update({ posts: n }); }} onBlur={() => saveConfig(config, true)} />
+                    <div className="space-y-2">
+                      {p.image && <img src={p.image} className="w-full h-32 object-cover rounded-xl" />}
+                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
+                        <ImageIcon size={14} /> {p.image ? "تغيير صورة المقال" : "رفع صورة المقال"}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.posts]; n[i] = { ...p, image: url }; const nxt = { ...config, posts: n }; setConfig(nxt); saveConfig(nxt, true); }); }} />
+                      </label>
+                    </div>
                   </div>
                 ))}
               </AdminCard>
             )}
 
             {tab === "competition" && (
-              <AdminCard title="Competition">
+              <AdminCard title="Competition - مسابقة flexible + رفع صورة">
+                <Toggle label={config.comp.isActive ? "المسابقة مفعلة - تظهر للزوار" : "المسابقة غير مفعلة - سيظهر قريبا"} value={config.comp.isActive} onChange={(v) => saveNow({ comp: { ...config.comp, isActive: v } })} />
                 <Field label="Title"><input className={inputCls} value={config.comp.title} onChange={(e) => update({ comp: { ...config.comp, title: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="Description"><textarea rows={3} className={inputCls} value={config.comp.desc} onChange={(e) => update({ comp: { ...config.comp, desc: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Field label="End date & time"><input type="datetime-local" className={inputCls} value={config.comp.endDate} onChange={(e) => saveNow({ comp: { ...config.comp, endDate: e.target.value } })} /></Field>
                   <Field label="Prize artwork"><ArtSelect value={config.comp.prizeArt} onChange={(v) => saveNow({ comp: { ...config.comp, prizeArt: v } })} /></Field>
                 </div>
+                <div className="space-y-2">
+                  <label className="block text-[11px] font-semibold tracking-[0.14em] uppercase text-[var(--muted)]">صورة الجائزة - Prize Image (تظهر في الموقع)</label>
+                  {config.comp.prizeImage && <img src={config.comp.prizeImage} className="w-full h-40 object-cover rounded-xl border" style={{ borderColor: "var(--line)" }} />}
+                  <div className="flex gap-2">
+                    <label className="flex-1 h-11 rounded-xl border border-dashed flex items-center justify-center gap-2 text-sm cursor-pointer hover:border-[var(--gold)]" style={{ borderColor: "var(--line)" }}>
+                      <ImageIcon size={16} /> {config.comp.prizeImage ? "تغيير صورة الجائزة" : "رفع صورة الجائزة"}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => saveNow({ comp: { ...config.comp, prizeImage: url } })); }} />
+                    </label>
+                    {config.comp.prizeImage && <button onClick={() => saveNow({ comp: { ...config.comp, prizeImage: "" } })} className="h-11 px-4 rounded-xl border text-sm" style={{ borderColor: "var(--line)" }}><Trash2 size={16} /></button>}
+                  </div>
+                </div>
                 <Field label="What you win (one prize per line)"><textarea rows={4} className={inputCls} value={config.comp.wins} onChange={(e) => update({ comp: { ...config.comp, wins: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="Winner announcement text"><textarea rows={2} className={inputCls} value={config.comp.winnerText} onChange={(e) => update({ comp: { ...config.comp, winnerText: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
+                
+                <div className="rounded-2xl border border-[var(--line)] p-5 space-y-4 bg-[var(--bg)]">
+                  <h4 className="font-semibold text-sm flex items-center gap-2"><Trophy size={16} className="text-[var(--gold)]" /> شروط المسابقة - Competition Requirements (فعّل اللي تحب)</h4>
+                  <p className="text-xs text-[var(--muted)]">كل شرط تقدر تفعّلو/تطفيه، وتبدل النص والرابط وعدد الأصدقاء. مثلا تقدر تطلب متابعة إنستا فقط، أو تطلب تعليق بكلمة معينة، أو تاغي 3 أصدقاء، أو مشاركة المنشور.</p>
+                  {(config.comp.requirements || []).map((req, idx) => (
+                    <div key={req.id} className={`rounded-xl border p-4 space-y-3 ${req.enabled ? "border-[var(--gold)] bg-[rgba(212,175,55,0.06)]" : "border-[var(--line)]"}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, enabled: !req.enabled }; saveNow({ comp: { ...config.comp, requirements: n } }); }} className={`w-11 h-6 rounded-full p-0.5 transition-colors ${req.enabled ? "bg-[var(--gold)]" : "bg-[var(--line)]"}`}><span className={`block w-5 h-5 rounded-full bg-white shadow transition-transform ${req.enabled ? "translate-x-5" : ""}`} /></button>
+                          <span className="text-xs font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-black/5">{req.type}</span>
+                        </div>
+                        <button onClick={() => { const n = (config.comp.requirements||[]).filter((_, i) => i !== idx); saveNow({ comp: { ...config.comp, requirements: n } }); }} className="w-8 h-8 rounded-full border flex items-center justify-center text-red-400"><Trash2 size={14} /></button>
+                      </div>
+                      <input className={inputCls} value={req.label} placeholder="نص الشرط" onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, label: e.target.value }; update({ comp: { ...config.comp, requirements: n } }); }} onBlur={() => saveConfig(config, true)} />
+                      {(req.type === "follow_ig" || req.type === "follow_fb" || req.type === "follow_snap" || req.type === "like_post" || req.type === "share") && (
+                        <input className={inputCls} value={req.url || ""} placeholder="رابط الحساب أو المنشور - URL" onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, url: e.target.value }; update({ comp: { ...config.comp, requirements: n } }); }} onBlur={() => saveConfig(config, true)} />
+                      )}
+                      {req.type === "comment" && (
+                        <input className={inputCls} value={req.keyword || ""} placeholder="كلمة مطلوبة في التعليق (اختياري) - مثلا VIVACE" onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, keyword: e.target.value }; update({ comp: { ...config.comp, requirements: n } }); }} onBlur={() => saveConfig(config, true)} />
+                      )}
+                      {req.type === "tag_friends" && (
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs">عدد الأصدقاء المطلوب تاغيهم:</span>
+                          <input type="number" min={1} max={10} className={`${inputCls} w-20`} value={req.count || 2} onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, count: Number(e.target.value) }; saveNow({ comp: { ...config.comp, requirements: n } }); }} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "follow_ig", label: "Follow on Instagram", enabled: true, url: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Follow IG</button>
+                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "like_post", label: "Like the post", enabled: true, url: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Like post</button>
+                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "comment", label: "Leave a comment", enabled: true, keyword: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Comment</button>
+                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "share", label: "Share the post", enabled: true, url: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Share</button>
+                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "tag_friends", label: "Tag friends", enabled: true, count: 2 } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Tag friends</button>
+                  </div>
+                </div>
+
                 <Field label="Starting like count"><input type="number" className={inputCls} value={config.comp.likeCount} onChange={(e) => update({ comp: { ...config.comp, likeCount: Number(e.target.value) || 0 } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <div className="rounded-2xl border border-[var(--line)] p-4">
                   <p className="text-[11px] tracking-[0.16em] uppercase font-bold text-[var(--muted)]">Entries so far · {entries.length}</p>
