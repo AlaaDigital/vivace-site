@@ -123,40 +123,6 @@ function safeLoad(key: string, fallback: any) {
   try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch {}
   return fallback;
 }
-
-function safeSave(key: string, value: any) {
-  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-}
-const GITHUB_OWNER = (import.meta as any).env?.VITE_GITHUB_OWNER || "AlaaDigital";
-const GITHUB_REPO = (import.meta as any).env?.VITE_GITHUB_REPO || "vivace-site";
-const GITHUB_BRANCH = (import.meta as any).env?.VITE_GITHUB_BRANCH || "main";
-const GITHUB_TOKEN = (import.meta as any).env?.VITE_GITHUB_TOKEN || "";
-const GITHUB_CONFIG_PATH = (import.meta as any).env?.VITE_GITHUB_CONFIG_PATH || "public/config.json";
-const GITHUB_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONFIG_PATH}`;
-async function loadFromGitHub(): Promise<any | null> {
-  try {
-    const r = await fetch(GITHUB_RAW_URL + "?t=" + Date.now(), { cache: "no-store" });
-    if (!r.ok) return null;
-    const txt = await r.text();
-    if (!txt || txt.trim() === "{}" || txt.trim() === "") return null;
-    return JSON.parse(txt);
-  } catch { return null; }
-}
-async function saveToGitHub(data: any): Promise<boolean> {
-  if (!GITHUB_TOKEN) return false;
-  try {
-    const getUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_CONFIG_PATH}`;
-    let sha: string | undefined;
-    try {
-      const res = await fetch(getUrl + `?ref=${GITHUB_BRANCH}`, { headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" } });
-      if (res.ok) { const j = await res.json(); sha = j.sha; }
-    } catch {}
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-    const putRes = await fetch(getUrl, { method: "PUT", headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json" }, body: JSON.stringify({ message: `Update config ${new Date().toISOString()}`, content, sha, branch: GITHUB_BRANCH }) });
-    return putRes.ok;
-  } catch { return false; }
-}
-
 const GITHUB_OWNER = (import.meta as any).env?.VITE_GITHUB_OWNER || "AlaaDigital";
 const GITHUB_REPO = (import.meta as any).env?.VITE_GITHUB_REPO || "vivace-site";
 const GITHUB_BRANCH = (import.meta as any).env?.VITE_GITHUB_BRANCH || "main";
@@ -277,16 +243,6 @@ export default function App() {
   /* load data */
   const loadAll = async () => {
     try {
-      const gh = await loadFromGitHub();
-      if (gh && gh.services) {
-        const merged = { ...DEFAULT_CONFIG, ...gh, bar: { ...DEFAULT_CONFIG.bar, ...(gh.bar||{}) }, general: { ...DEFAULT_CONFIG.general, ...(gh.general||{}) }, hero: { ...DEFAULT_CONFIG.hero, ...(gh.hero||{}) }, comp: { ...DEFAULT_CONFIG.comp, ...(gh.comp||{}), requirements: gh.comp?.requirements || DEFAULT_CONFIG.comp.requirements }, seo: { ...DEFAULT_CONFIG.seo, ...(gh.seo||{}) }, appearance: { ...DEFAULT_CONFIG.appearance, ...(gh.appearance||{}) }, services: gh.services || DEFAULT_CONFIG.services, results: gh.results || DEFAULT_CONFIG.results, posts: gh.posts || DEFAULT_CONFIG.posts };
-        setConfig(merged);
-        if (!themeTouched) setTheme(merged.appearance.defaultTheme === "dark" ? "dark" : "light");
-        setStoreStatus("GitHub connected ✓ - يظهر للكل");
-      }
-    } catch {}
-
-    try {
       const cfgRes = (await api("records.list", { collection: "config", limit: 1 })) as { records: { id: string; value: Config }[] };
       if (cfgRes.records.length > 0) {
         const merged = { ...DEFAULT_CONFIG, ...cfgRes.records[0].value };
@@ -308,18 +264,20 @@ export default function App() {
   const saveConfig = async (next: Config, silent = false) => {
     setSaving(true);
     try {
-      safeSave("vivace_config_v6", next);
       safeSave("vivace_config", next);
-      let ghOk = false;
-      if (GITHUB_TOKEN) { ghOk = await saveToGitHub(next); }
       try {
-        if (configId) { await api("records.replace", { collection: "config", id: configId, value: next }); }
-        else { const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string }; setConfigId(created.id); }
+        if (configId) {
+          await api("records.replace", { collection: "config", id: configId, value: next });
+        } else {
+          const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string };
+          setConfigId(created.id);
+        }
       } catch {}
-      if (ghOk) { setStoreStatus("GitHub connected ✓ - يظهر للكل"); if (!silent) showToast("Saved to GitHub ✓ يظهر للكل"); }
-      else if (GITHUB_TOKEN) { if (!silent) showToast("Saved ✓ محليا - خطأ GitHub"); }
-      else { setStoreStatus("Database connected (local) - أضف Token"); if (!silent) showToast("Saved locally ✓"); }
-    } catch { safeSave("vivace_config_v6", next); showToast("Saved locally ✓"); }
+      if (!silent) showToast("Saved ✓ تم الحفظ");
+    } catch (e) {
+      safeSave("vivace_config", next);
+      showToast("Saved locally ✓");
+    }
     setSaving(false);
   };
 
