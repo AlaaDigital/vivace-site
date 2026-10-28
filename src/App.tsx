@@ -603,9 +603,13 @@ export default function App() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
             {config.results.map((r, i) => (
               <article key={i} className="reveal group rounded-[24px] overflow-hidden bg-[var(--surface)] border border-[var(--line)] shadow-[var(--card-shadow)] transition-all duration-500 hover:-translate-y-2">
-                <div className={`grid grid-cols-2 relative ${r.size === "tall" ? "h-64" : "h-52"}`}>
-                  <div className="flex items-center justify-center" style={{ background: "linear-gradient(160deg,#efe6e0,#d9c6bb)" }}><LipsArt tone="#b98d84" small /></div>
-                  <div className="flex items-center justify-center" style={{ background: ART[r.art] || ART.rose }}><LipsArt tone="#8e4a56" small glow /></div>
+                <div className={`grid grid-cols-2 relative ${r.size === "tall" ? "h-64" : "h-52"} overflow-hidden`}>
+                  <div className="relative overflow-hidden h-full">
+                    {r.beforeImage ? <img src={r.beforeImage} alt="Before" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(160deg,#efe6e0,#d9c6bb)" }}><LipsArt tone="#b98d84" small /></div>}
+                  </div>
+                  <div className="relative overflow-hidden h-full">
+                    {r.image ? <img src={r.image} alt="After" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center" style={{ background: ART[r.art] || ART.rose }}><LipsArt tone="#8e4a56" small glow /></div>}
+                  </div>
                   <span className="absolute top-3 left-3 text-[9px] tracking-[0.2em] font-bold bg-black/55 text-white px-2.5 py-1 rounded-full">BEFORE</span>
                   <span className="absolute top-3 right-3 text-[9px] tracking-[0.2em] font-bold bg-black/55 text-white px-2.5 py-1 rounded-full">AFTER</span>
                   <div className="absolute left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 bg-white/70 group-hover:bg-[var(--gold)] transition-colors" />
