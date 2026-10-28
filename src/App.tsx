@@ -1016,64 +1016,15 @@ export default function App() {
             )}
 
             {tab === "competition" && (
-              <AdminCard title="Competition - مسابقة flexible + رفع صورة">
-                <Toggle label={config.comp.isActive ? "المسابقة مفعلة - تظهر للزوار" : "المسابقة غير مفعلة - سيظهر قريبا"} value={config.comp.isActive} onChange={(v) => saveNow({ comp: { ...config.comp, isActive: v } })} />
+              <AdminCard title="Competition">
                 <Field label="Title"><input className={inputCls} value={config.comp.title} onChange={(e) => update({ comp: { ...config.comp, title: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="Description"><textarea rows={3} className={inputCls} value={config.comp.desc} onChange={(e) => update({ comp: { ...config.comp, desc: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Field label="End date & time"><input type="datetime-local" className={inputCls} value={config.comp.endDate} onChange={(e) => saveNow({ comp: { ...config.comp, endDate: e.target.value } })} /></Field>
                   <Field label="Prize artwork"><ArtSelect value={config.comp.prizeArt} onChange={(v) => saveNow({ comp: { ...config.comp, prizeArt: v } })} /></Field>
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-[11px] font-semibold tracking-[0.14em] uppercase text-[var(--muted)]">صورة الجائزة - Prize Image (تظهر في الموقع)</label>
-                  {config.comp.prizeImage && <img src={config.comp.prizeImage} className="w-full h-40 object-cover rounded-xl border" style={{ borderColor: "var(--line)" }} />}
-                  <div className="flex gap-2">
-                    <label className="flex-1 h-11 rounded-xl border border-dashed flex items-center justify-center gap-2 text-sm cursor-pointer hover:border-[var(--gold)]" style={{ borderColor: "var(--line)" }}>
-                      <ImageIcon size={16} /> {config.comp.prizeImage ? "تغيير صورة الجائزة" : "رفع صورة الجائزة"}
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => saveNow({ comp: { ...config.comp, prizeImage: url } })); }} />
-                    </label>
-                    {config.comp.prizeImage && <button onClick={() => saveNow({ comp: { ...config.comp, prizeImage: "" } })} className="h-11 px-4 rounded-xl border text-sm" style={{ borderColor: "var(--line)" }}><Trash2 size={16} /></button>}
-                  </div>
-                </div>
                 <Field label="What you win (one prize per line)"><textarea rows={4} className={inputCls} value={config.comp.wins} onChange={(e) => update({ comp: { ...config.comp, wins: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="Winner announcement text"><textarea rows={2} className={inputCls} value={config.comp.winnerText} onChange={(e) => update({ comp: { ...config.comp, winnerText: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
-                
-                <div className="rounded-2xl border border-[var(--line)] p-5 space-y-4 bg-[var(--bg)]">
-                  <h4 className="font-semibold text-sm flex items-center gap-2"><Trophy size={16} className="text-[var(--gold)]" /> شروط المسابقة - Competition Requirements (فعّل اللي تحب)</h4>
-                  <p className="text-xs text-[var(--muted)]">كل شرط تقدر تفعّلو/تطفيه، وتبدل النص والرابط وعدد الأصدقاء. مثلا تقدر تطلب متابعة إنستا فقط، أو تطلب تعليق بكلمة معينة، أو تاغي 3 أصدقاء، أو مشاركة المنشور.</p>
-                  {(config.comp.requirements || []).map((req, idx) => (
-                    <div key={req.id} className={`rounded-xl border p-4 space-y-3 ${req.enabled ? "border-[var(--gold)] bg-[rgba(212,175,55,0.06)]" : "border-[var(--line)]"}`}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, enabled: !req.enabled }; saveNow({ comp: { ...config.comp, requirements: n } }); }} className={`w-11 h-6 rounded-full p-0.5 transition-colors ${req.enabled ? "bg-[var(--gold)]" : "bg-[var(--line)]"}`}><span className={`block w-5 h-5 rounded-full bg-white shadow transition-transform ${req.enabled ? "translate-x-5" : ""}`} /></button>
-                          <span className="text-xs font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-black/5">{req.type}</span>
-                        </div>
-                        <button onClick={() => { const n = (config.comp.requirements||[]).filter((_, i) => i !== idx); saveNow({ comp: { ...config.comp, requirements: n } }); }} className="w-8 h-8 rounded-full border flex items-center justify-center text-red-400"><Trash2 size={14} /></button>
-                      </div>
-                      <input className={inputCls} value={req.label} placeholder="نص الشرط" onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, label: e.target.value }; update({ comp: { ...config.comp, requirements: n } }); }} onBlur={() => saveConfig(config, true)} />
-                      {(req.type === "follow_ig" || req.type === "follow_fb" || req.type === "follow_snap" || req.type === "like_post" || req.type === "share") && (
-                        <input className={inputCls} value={req.url || ""} placeholder="رابط الحساب أو المنشور - URL" onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, url: e.target.value }; update({ comp: { ...config.comp, requirements: n } }); }} onBlur={() => saveConfig(config, true)} />
-                      )}
-                      {req.type === "comment" && (
-                        <input className={inputCls} value={req.keyword || ""} placeholder="كلمة مطلوبة في التعليق (اختياري) - مثلا VIVACE" onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, keyword: e.target.value }; update({ comp: { ...config.comp, requirements: n } }); }} onBlur={() => saveConfig(config, true)} />
-                      )}
-                      {req.type === "tag_friends" && (
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs">عدد الأصدقاء المطلوب تاغيهم:</span>
-                          <input type="number" min={1} max={10} className={`${inputCls} w-20`} value={req.count || 2} onChange={(e) => { const n = [...(config.comp.requirements||[])]; n[idx] = { ...req, count: Number(e.target.value) }; saveNow({ comp: { ...config.comp, requirements: n } }); }} />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "follow_ig", label: "Follow on Instagram", enabled: true, url: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Follow IG</button>
-                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "like_post", label: "Like the post", enabled: true, url: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Like post</button>
-                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "comment", label: "Leave a comment", enabled: true, keyword: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Comment</button>
-                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "share", label: "Share the post", enabled: true, url: "" } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Share</button>
-                    <button onClick={() => { const id = `req_${Date.now()}`; const n = [...(config.comp.requirements||[]), { id, type: "tag_friends", label: "Tag friends", enabled: true, count: 2 } as any]; saveNow({ comp: { ...config.comp, requirements: n } }); }} className="h-9 px-3 rounded-full border text-xs font-semibold">+ Tag friends</button>
-                  </div>
-                </div>
-
                 <Field label="Starting like count"><input type="number" className={inputCls} value={config.comp.likeCount} onChange={(e) => update({ comp: { ...config.comp, likeCount: Number(e.target.value) || 0 } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <div className="rounded-2xl border border-[var(--line)] p-4">
                   <p className="text-[11px] tracking-[0.16em] uppercase font-bold text-[var(--muted)]">Entries so far · {entries.length}</p>
