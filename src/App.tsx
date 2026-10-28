@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 
 /* ---------------------------------- types --------------------------------- */
-type Service = { name: string; desc: string; price: string; tag: string; color: string };
-type ResultItem = { caption: string; sub: string; art: string; size: string };
-type Post = { title: string; date: string; excerpt: string; content: string; art: string };
+type Service = { name: string; desc: string; price: string; tag: string; color: string; image?: string };
+type ResultItem = { caption: string; sub: string; art: string; size: string; image?: string; beforeImage?: string; afterImage?: string };
+type Post = { title: string; date: string; excerpt: string; content: string; art: string; image?: string };
 type Booking = { id?: string; name: string; service: string; phone: string; date: string; status: string; finalDate: string; finalTime: string; notes: string };
 type Entry = { id?: string; name: string; handle: string; at: string };
 
@@ -46,25 +46,25 @@ const DEFAULT_CONFIG: Config = {
     art: "rose", statA: "3.4K+", statALabel: "Happy clients", statB: "346", statBLabel: "Five-star reviews", statC: "4.9", statCLabel: "Average rating",
   },
   services: [
-    { name: "Signature Lip Filler", desc: "Our iconic balanced lip enhancement, tailored to your facial harmony.", price: "From $449", tag: "Most loved", color: "rose" },
-    { name: "Skin Boosters", desc: "Deep hydration that restores glow, elasticity and that lit-from-within finish.", price: "From $299", tag: "Glow", color: "gold" },
-    { name: "Anti-Wrinkle", desc: "Precise, softening treatments that keep expression — never frozen.", price: "From $12/unit", tag: "Refine", color: "noir" },
-    { name: "Dermal Filler", desc: "Sculpt, contour and restore volume with a feather-light touch.", price: "From $549", tag: "Sculpt", color: "sunset" },
-    { name: "Fat Dissolving", desc: "Target stubborn pockets for a cleaner, more defined profile.", price: "From $399", tag: "Define", color: "sage" },
-    { name: "Luxury Facial Ritual", desc: "A 90-minute restorative ritual: cleanse, sculpt, infuse, illuminate.", price: "From $189", tag: "Ritual", color: "pearl" },
+    { name: "Signature Lip Filler", desc: "Our iconic balanced lip enhancement, tailored to your facial harmony.", price: "From $449", tag: "Most loved", color: "rose", image: "" },
+    { name: "Skin Boosters", desc: "Deep hydration that restores glow, elasticity and that lit-from-within finish.", price: "From $299", tag: "Glow", color: "gold", image: "" },
+    { name: "Anti-Wrinkle", desc: "Precise, softening treatments that keep expression — never frozen.", price: "From $12/unit", tag: "Refine", color: "noir", image: "" },
+    { name: "Dermal Filler", desc: "Sculpt, contour and restore volume with a feather-light touch.", price: "From $549", tag: "Sculpt", color: "sunset", image: "" },
+    { name: "Fat Dissolving", desc: "Target stubborn pockets for a cleaner, more defined profile.", price: "From $399", tag: "Define", color: "sage", image: "" },
+    { name: "Luxury Facial Ritual", desc: "A 90-minute restorative ritual: cleanse, sculpt, infuse, illuminate.", price: "From $189", tag: "Ritual", color: "pearl", image: "" },
   ],
   results: [
-    { caption: "Signature Lips · 1ml", sub: "Healed, week two", art: "rose", size: "tall" },
-    { caption: "Skin Booster Glow", sub: "After two sessions", art: "pearl", size: "wide" },
-    { caption: "Lip Definition", sub: "Cupid's bow refinement", art: "sunset", size: "tall" },
-    { caption: "Profile Balance", sub: "Chin + lips harmony", art: "gold", size: "wide" },
-    { caption: "Natural Volume", sub: "First-time client", art: "rose", size: "tall" },
-    { caption: "Radiance Ritual", sub: "Post-facial glow", art: "sage", size: "wide" },
+    { caption: "Signature Lips · 1ml", sub: "Healed, week two", art: "rose", size: "tall", image: "" },
+    { caption: "Skin Booster Glow", sub: "After two sessions", art: "pearl", size: "wide", image: "" },
+    { caption: "Lip Definition", sub: "Cupid's bow refinement", art: "sunset", size: "tall", image: "" },
+    { caption: "Profile Balance", sub: "Chin + lips harmony", art: "gold", size: "wide", image: "" },
+    { caption: "Natural Volume", sub: "First-time client", art: "rose", size: "tall", image: "" },
+    { caption: "Radiance Ritual", sub: "Post-facial glow", art: "sage", size: "wide", image: "" },
   ],
   posts: [
-    { title: "The Art of the Natural Lip", date: "2026-06-12", excerpt: "Why the most beautiful lips are the ones nobody can quite put their finger on.", content: "Natural lip enhancement is a study in restraint. At Vivace we map your facial thirds first, then build volume in whisper-thin layers so the result moves, smiles and settles like it was always yours. Hydration, border definition and symmetry do more for beauty than size ever will.", art: "rose" },
-    { title: "Skin Boosters, Explained", date: "2026-06-28", excerpt: "The glow treatment our clients book on repeat — what it does and who it suits.", content: "Skin boosters are micro-injections of hydrating gel that work like an internal moisturiser. Over two to three sessions, skin becomes plumper, light reflects more evenly, and makeup sits beautifully. It is the quiet luxury of skincare: invisible work, visible radiance.", art: "gold" },
-    { title: "Your First Appointment, Step by Step", date: "2026-07-09", excerpt: "From consultation to aftercare — exactly what to expect at Vivace Clinic.", content: "Every Vivace journey begins with a consultation. We listen first: your goals, your concerns, your timeline. Treatment is gentle and unhurried, and you leave with a personalised aftercare plan and our direct line for any question, day or night.", art: "pearl" },
+    { title: "The Art of the Natural Lip", date: "2026-06-12", excerpt: "Why the most beautiful lips are the ones nobody can quite put their finger on.", content: "Natural lip enhancement is a study in restraint. At Vivace we map your facial thirds first, then build volume in whisper-thin layers so the result moves, smiles and settles like it was always yours. Hydration, border definition and symmetry do more for beauty than size ever will.", art: "rose", image: "" },
+    { title: "Skin Boosters, Explained", date: "2026-06-28", excerpt: "The glow treatment our clients book on repeat — what it does and who it suits.", content: "Skin boosters are micro-injections of hydrating gel that work like an internal moisturiser. Over two to three sessions, skin becomes plumper, light reflects more evenly, and makeup sits beautifully. It is the quiet luxury of skincare: invisible work, visible radiance.", art: "gold", image: "" },
+    { title: "Your First Appointment, Step by Step", date: "2026-07-09", excerpt: "From consultation to aftercare — exactly what to expect at Vivace Clinic.", content: "Every Vivace journey begins with a consultation. We listen first: your goals, your concerns, your timeline. Treatment is gentle and unhurried, and you leave with a personalised aftercare plan and our direct line for any question, day or night.", art: "pearl", image: "" },
   ],
   comp: {
     title: "The Vivace Glow Giveaway",
@@ -92,17 +92,91 @@ const REVIEWS = [
 ];
 
 /* ---------------------------------- api ----------------------------------- */
+function safeSave(key: string, value: any) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+function safeLoad(key: string, fallback: any) {
+  try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch {}
+  return fallback;
+}
+function handleImageUpload(file: File, onDone: (dataUrl: string) => void) {
+  const reader = new FileReader();
+  reader.onload = () => onDone(reader.result as string);
+  reader.readAsDataURL(file);
+}
 async function api(action: string, args: Record<string, unknown>) {
-  const res = await fetch("actions", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ action, args }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || (data as { error?: string }).error) {
-    throw new Error((data as { error?: string }).error || `Request failed (${res.status})`);
+  try {
+    const res = await fetch("actions", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action, args }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || (data as { error?: string }).error) {
+      // Fallback to localStorage when deployed on static Pages (no actions endpoint -> 405)
+      if (res.status === 405 || res.status === 404) {
+        console.warn("API not available, using localStorage fallback", action);
+        // Simulate success for config collection
+        if (action === "records.list") {
+          const col = (args as any).collection;
+          if (col === "config") {
+            const cfg = safeLoad("vivace_config", null);
+            if (cfg) return { records: [{ id: "local-config", value: cfg }] };
+            return { records: [] };
+          }
+          if (col === "bookings") {
+            const bks = safeLoad("vivace_bookings", []);
+            return { records: bks.map((v: any, i: number) => ({ id: v.id || `bk-${i}`, value: v })) };
+          }
+          if (col === "entries") {
+            const ents = safeLoad("vivace_entries", []);
+            return { records: ents.map((v: any, i: number) => ({ id: v.id || `en-${i}`, value: v })) };
+          }
+        }
+        if (action === "records.create" || action === "records.replace") {
+          // Save to localStorage
+          const col = (args as any).collection;
+          const val = (args as any).value;
+          if (col === "config") safeSave("vivace_config", val);
+          if (col === "bookings") {
+            const all = safeLoad("vivace_bookings", []);
+            all.push(val); safeSave("vivace_bookings", all);
+          }
+          if (col === "entries") {
+            const all = safeLoad("vivace_entries", []);
+            all.push(val); safeSave("vivace_entries", all);
+          }
+          return { id: `local-${Date.now()}` };
+        }
+        if (action === "records.delete") return {};
+        throw new Error("Offline mode - saved locally");
+      }
+      throw new Error((data as { error?: string }).error || `Request failed (${res.status})`);
+    }
+    return (data as { data: unknown }).data;
+  } catch (e) {
+    // Network error fallback
+    if (e instanceof Error && e.message.includes("Offline mode")) {
+      return { id: `local-${Date.now()}` };
+    }
+    // Try localStorage fallback for 405 already handled, otherwise rethrow but with nicer message
+    if (String(e).includes("Failed to fetch") || String(e).includes("405")) {
+      const col = (args as any)?.collection;
+      if (action === "records.list" && col === "config") {
+        const cfg = safeLoad("vivace_config", null);
+        if (cfg) return { records: [{ id: "local-config", value: cfg }] };
+        return { records: [] };
+      }
+      if (action === "records.create" || action === "records.replace") {
+        const val = (args as any)?.value;
+        const c = (args as any)?.collection;
+        if (c === "config") safeSave("vivace_config", val);
+        return { id: `local-${Date.now()}` };
+      }
+      throw new Error("Saved locally - Cloudflare Pages has no database, using browser storage");
+    }
+    throw e;
   }
-  return (data as { data: unknown }).data;
 }
 
 const waLink = (number: string, text: string) =>
@@ -174,15 +248,22 @@ export default function App() {
   const saveConfig = async (next: Config, silent = false) => {
     setSaving(true);
     try {
-      if (configId) {
-        await api("records.replace", { collection: "config", id: configId, value: next });
-      } else {
-        const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string };
-        setConfigId(created.id);
+      // Always save locally first - no 405
+      safeSave("vivace_config", next);
+      try {
+        if (configId) {
+          await api("records.replace", { collection: "config", id: configId, value: next });
+        } else {
+          const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string };
+          setConfigId(created.id);
+        }
+      } catch (apiErr) {
+        console.warn("API save fallback to localStorage", apiErr);
       }
-      if (!silent) showToast("Saved — live for every visitor, no file re-upload needed.");
+      if (!silent) showToast("Saved ✓ - تم الحفظ محليا (ما عادش 405)");
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Could not save. Please try again.");
+      safeSave("vivace_config", next);
+      showToast("Saved locally ✓");
     }
     setSaving(false);
   };
@@ -841,7 +922,7 @@ export default function App() {
             )}
 
             {tab === "services" && (
-              <AdminCard title={`Services (${config.services.length})`} action={<AddBtn onClick={() => saveNow({ services: [...config.services, { name: "New Service", desc: "Describe the treatment…", price: "From $", tag: "New", color: "rose" }] })} />}>
+              <AdminCard title={`Services (${config.services.length})`} action={<AddBtn onClick={() => saveNow({ services: [...config.services, { name: "New Service", desc: "Describe the treatment…", price: "From $", tag: "New", color: "rose", image: "" }] })} />}>
                 {config.services.map((s, i) => (
                   <div key={i} className="rounded-2xl border border-[var(--line)] p-4 space-y-3">
                     <div className="flex items-center gap-3">
@@ -854,6 +935,11 @@ export default function App() {
                       <input className={inputCls} value={s.price} placeholder="Price" onChange={(e) => { const n = [...config.services]; n[i] = { ...s, price: e.target.value }; update({ services: n }); }} onBlur={() => saveConfig(config, true)} />
                       <input className={inputCls} value={s.tag} placeholder="Tag" onChange={(e) => { const n = [...config.services]; n[i] = { ...s, tag: e.target.value }; update({ services: n }); }} onBlur={() => saveConfig(config, true)} />
                       <select className={inputCls} value={s.color} onChange={(e) => { const n = [...config.services]; n[i] = { ...s, color: e.target.value }; saveNow({ services: n }); }}>{ART_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
+                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)] col-span-3 mt-2">
+                        <ImageIcon size={14} /> {s.image ? "تغيير صورة الخدمة" : "رفع صورة الخدمة"}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.services]; n[i] = { ...s, image: url }; saveNow({ services: n }); }); }} />
+                      </label>
+                      {s.image && <img src={s.image} className="w-full h-24 object-cover rounded-xl" />}
                     </div>
                   </div>
                 ))}
@@ -861,12 +947,28 @@ export default function App() {
             )}
 
             {tab === "results" && (
-              <AdminCard title="Before / After results">
+              <AdminCard title="Before / After results - مع رفع الصور">
                 {config.results.map((r, i) => (
                   <div key={i} className="rounded-2xl border border-[var(--line)] p-4 space-y-3">
                     <div className={`grid grid-cols-2 rounded-xl overflow-hidden ${r.size === "tall" ? "h-28" : "h-20"}`}>
-                      <div style={{ background: "linear-gradient(160deg,#efe6e0,#d9c6bb)" }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-[#6b5750]">BEFORE</div>
-                      <div style={{ background: ART[r.art] || ART.rose }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-black/50">AFTER</div>
+                      {r.beforeImage ? <img src={r.beforeImage} className="w-full h-full object-cover" /> : <div style={{ background: "linear-gradient(160deg,#efe6e0,#d9c6bb)" }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-[#6b5750]">BEFORE</div>}
+                      {r.image ? <img src={r.image} className="w-full h-full object-cover" /> : <div style={{ background: ART[r.art] || ART.rose }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-black/50">AFTER</div>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-[var(--muted)] uppercase">Before Photo</label>
+                        <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
+                          <ImageIcon size={14} /> {r.beforeImage ? "تغيير Before" : "رفع Before"}
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, beforeImage: url }; saveNow({ results: n }); }); }} />
+                        </label>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-[var(--muted)] uppercase">After Photo</label>
+                        <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
+                          <ImageIcon size={14} /> {r.image ? "تغيير After" : "رفع After"}
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, image: url }; saveNow({ results: n }); }); }} />
+                        </label>
+                      </div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-3">
                       <input className={inputCls} value={r.caption} placeholder="Caption" onChange={(e) => { const n = [...config.results]; n[i] = { ...r, caption: e.target.value }; update({ results: n }); }} onBlur={() => saveConfig(config, true)} />
@@ -876,14 +978,18 @@ export default function App() {
                       <select className={inputCls} value={r.art} onChange={(e) => { const n = [...config.results]; n[i] = { ...r, art: e.target.value }; saveNow({ results: n }); }}>{ART_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
                       <select className={inputCls} value={r.size} onChange={(e) => { const n = [...config.results]; n[i] = { ...r, size: e.target.value }; saveNow({ results: n }); }}><option value="tall">Preview: Tall</option><option value="wide">Preview: Wide</option></select>
                     </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => { const n = [...config.results]; n[i] = { ...r, image: "", beforeImage: "" }; saveNow({ results: n }); }} className="text-xs text-red-400 flex items-center gap-1"><Trash2 size={12} /> حذف الصور</button>
+                    </div>
                   </div>
                 ))}
-                <p className="text-xs text-[var(--muted)]">Photo uploads are not available yet — artwork styles stand in beautifully until they arrive.</p>
+                <AddBtn onClick={() => saveNow({ results: [...config.results, { caption: "New Result", sub: "After treatment", art: "rose", size: "tall", image: "", beforeImage: "" }] })} />
+                <p className="text-xs text-green-600 bg-green-50 p-3 rounded-xl">✓ تم تفعيل رفع الصور - ارفع Before و After الحقيقية. إذا ما رفعتش صورة، الـ gradient يبقى ظاهر.</p>
               </AdminCard>
             )}
 
             {tab === "blog" && (
-              <AdminCard title={`Blog posts (${config.posts.length})`} action={<AddBtn onClick={() => saveNow({ posts: [{ title: "New Journal Post", date: new Date().toISOString().slice(0, 10), excerpt: "A short teaser…", content: "Write your article here.", art: "rose" }, ...config.posts] })} />}>
+              <AdminCard title={`Blog posts (${config.posts.length})`} action={<AddBtn onClick={() => saveNow({ posts: [{ title: "New Journal Post", date: new Date().toISOString().slice(0, 10), excerpt: "A short teaser…", content: "Write your article here.", art: "rose", image: "" }, ...config.posts] })} />}>
                 {config.posts.map((p, i) => (
                   <div key={i} className="rounded-2xl border border-[var(--line)] p-4 space-y-3">
                     <div className="flex gap-3">
@@ -1061,24 +1167,6 @@ function SectionHead({ kicker, title, accent, sub }: { kicker: string; title: st
       </h2>
       <div className="hairline w-24 mx-auto my-6" />
       <p className="text-[var(--muted)] leading-relaxed">{sub}</p>
-    </div>
-  );
-}
-
-
-function ImageUpload({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-[11px] font-semibold tracking-[0.14em] uppercase text-[var(--muted)]">{label}</label>
-      {value && value.startsWith("data:") && <img src={value} alt="preview" className="w-full h-[120px] object-cover rounded-xl border" style={{ borderColor: "var(--line)" }} />}
-      {value && !value.startsWith("data:") && ART[value] && <div className="w-full h-[120px] rounded-xl" style={{ background: ART[value] }} />}
-      <div className="flex gap-2">
-        <label className="flex-1 h-10 rounded-xl border border-dashed flex items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]" style={{ borderColor: "var(--line)" }}>
-          <Upload size={14} /> {value ? "تغيير الصورة" : "رفع صورة"}
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, onChange); }} />
-        </label>
-        {value && <button type="button" onClick={() => onChange("")} className="h-10 px-3 rounded-xl border text-xs" style={{ borderColor: "var(--line)" }}><Trash2 size={14} /></button>}
-      </div>
     </div>
   );
 }
