@@ -123,12 +123,24 @@ function safeLoad(key: string, fallback: any) {
   try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch {}
   return fallback;
 }
-const GITHUB_OWNER = (import.meta as any).env?.VITE_GITHUB_OWNER || "AlaaDigital";
-const GITHUB_REPO = (import.meta as any).env?.VITE_GITHUB_REPO || "vivace-site";
-const GITHUB_BRANCH = (import.meta as any).env?.VITE_GITHUB_BRANCH || "main";
-const GITHUB_TOKEN = (import.meta as any).env?.VITE_GITHUB_TOKEN || "";
-const GITHUB_CONFIG_PATH = (import.meta as any).env?.VITE_GITHUB_CONFIG_PATH || "public/config.json";
-const GITHUB_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONFIG_PATH}`;
+
+// Cloudflare KV via Pages Functions - no GitHub needed
+async function loadFromKV(): Promise<any | null> {
+  try {
+    const r = await fetch("/api/config?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || Object.keys(j).length === 0) return null;
+    return j;
+  } catch { return null; }
+}
+async function saveToKV(data: any): Promise<boolean> {
+  try {
+    const r = await fetch("/api/config", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    return r.ok;
+  } catch { return false; }
+}
+
 function handleImageUpload(file: File, onDone: (dataUrl: string) => void) {
   const reader = new FileReader();
   reader.onload = () => onDone(reader.result as string);
@@ -198,7 +210,7 @@ async function api(action: string, args: Record<string, unknown>) {
 const waLink = (number: string, text: string) =>
   `https://wa.me/${number.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
 
-const GITHUB_RAW_CONFIG_URL = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/vivace-config.json";
+const "" = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/vivace-config.json";
 
 /* --------------------------------- app ------------------------------------ */
 export default function App() {
@@ -264,20 +276,15 @@ export default function App() {
   const saveConfig = async (next: Config, silent = false) => {
     setSaving(true);
     try {
-      safeSave("vivace_config", next);
+      safeSave("vivace_config_v6", next);
+      const kvOk = await saveToKV(next);
       try {
-        if (configId) {
-          await api("records.replace", { collection: "config", id: configId, value: next });
-        } else {
-          const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string };
-          setConfigId(created.id);
-        }
+        if (configId) { await api("records.replace", { collection: "config", id: configId, value: next }); }
+        else { const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string }; setConfigId(created.id); }
       } catch {}
-      if (!silent) showToast("Saved ✓ تم الحفظ");
-    } catch (e) {
-      safeSave("vivace_config", next);
-      showToast("Saved locally ✓");
-    }
+      if (kvOk) { setStoreStatus("Cloudflare KV connected ✓ - يظهر للكل"); if (!silent) showToast("Saved to Cloudflare ✓ يظهر للكل"); }
+      else { setStoreStatus("Saved locally ✓"); if (!silent) showToast("Saved locally ✓"); }
+    } catch { safeSave("vivace_config_v6", next); showToast("Saved locally ✓"); }
     setSaving(false);
   };
 
@@ -1103,7 +1110,7 @@ export default function App() {
                   <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${storeStatus.includes("Connected") ? "bg-emerald-500" : "bg-amber-400 animate-pulse"}`} />
                   <span className="text-[var(--muted)]">{storeStatus}</span>
                 </div>
-                <p className="text-xs text-[var(--muted)] break-all">GitHub config endpoint: <code>{GITHUB_RAW_CONFIG_URL}</code></p>
+                <p className="text-xs text-[var(--muted)] break-all">GitHub config endpoint: <code>{""}</code></p>
                 <div className="flex flex-wrap gap-3">
                   <button onClick={() => saveConfig(config)} disabled={saving} className="flex items-center gap-2 h-11 px-5 rounded-xl font-semibold text-sm text-[#1A1A1A] disabled:opacity-50" style={{ background: "linear-gradient(120deg,var(--gold),#E9CE7A)" }}><Save size={15} /> {saving ? "Saving…" : "Save all changes"}</button>
                   <button onClick={() => { loadAll(); showToast("Reloaded the latest saved content."); }} className="flex items-center gap-2 h-11 px-5 rounded-xl border border-[var(--line)] text-sm font-semibold hover:border-[var(--gold)] transition-all"><RefreshCw size={15} /> Reload from database</button>
