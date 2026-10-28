@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500;1,600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --rose:#E8B4B8;
+  --rose-deep:#C98A91;
+  --gold:#D4AF37;
+  --gold-soft:#E9CE7A;
+  --ink:#1A1A1A;
+  --alabaster:#FFFBF8;
+  --blush:#FDF2F2;
+  --bg:#FFFBF8;
+  --surface:#FFFFFF;
+  --surface-2:#FDF2F2;
+  --text:#1A1A1A;
+  --muted:#6E6259;
+  --line:rgba(212,175,55,.28);
+  --card-shadow:0 24px 60px -24px rgba(26,26,26,.22);
+}
+[data-theme="dark"]{
+  --bg:#1A1A1A;
+  --surface:#222222;
+  --surface-2:#262626;
+  --text:#F7EFEA;
+  --muted:#B9AFA6;
+  --line:rgba(212,175,55,.35);
+  --card-shadow:0 24px 60px -24px rgba(0,0,0,.7);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#FFFBF8; }
+}
+
+html{ scroll-behavior:smooth; }
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family: ui-sans-system, -apple-system, "Segoe UI", Helvetica, sans-serif;
+  transition: background-color .4s ease, color .4s ease;
+}
+.font-display{ font-family:"Playfair Display", Georgia, serif; }
+.font-accent{ font-family:"Cormorant Garamond", Georgia, serif; font-style:italic; }
+
+@keyframes floaty{
+  0%,100%{ transform:translateY(0) scale(1); }
+  50%{ transform:translateY(-12px) scale(1.015); }
+}
+@keyframes floatyLate{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-9px); }
+}
+@keyframes marquee{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+@keyframes shake{
+  10%,90%{ transform:translateX(-2px); }
+  20%,80%{ transform:translateX(3px); }
+  30%,50%,70%{ transform:translateX(-5px); }
+  40%,60%{ transform:translateX(5px); }
+}
+@keyframes pulseGold{
+  0%,100%{ box-shadow:0 0 0 0 rgba(212,175,55,.45); }
+  50%{ box-shadow:0 0 0 10px rgba(212,175,55,0); }
+}
+.anim-float{ animation:floaty 6s ease-in-out infinite; }
+.anim-float-late{ animation:floatyLate 6s ease-in-out infinite; animation-delay:1.4s; }
+.anim-float-later{ animation:floatyLate 7s ease-in-out infinite; animation-delay:2.3s; }
+.anim-marquee{ animation:marquee 30s linear infinite; }
+.anim-shake{ animation:shake .5s ease both; }
+.anim-pulse-gold{ animation:pulseGold 2.6s ease-in-out infinite; }
+
+.reveal{ opacity:0; transform:translateY(30px); transition:opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.reveal.is-visible{ opacity:1; transform:translateY(0); }
+
+.gold-text{
+  background:linear-gradient(105deg,#a97f1f 0%, var(--gold) 35%, #f3dd8f 55%, var(--gold) 75%, #a97f1f 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hairline{ background:linear-gradient(90deg, transparent, var(--gold), transparent); height:1px; }
+
+.lips-shape{
+  border-radius:58% 42% 55% 45% / 62% 58% 42% 38%;
+}
+.grain::after{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(255,255,255,.9) 1px, transparent 1px);
+  background-size:5px 5px;
+}
+input,select,textarea{ transition:border-color .25s ease, box-shadow .25s ease, background-color .4s ease, color .4s ease; }
+input:focus,select:focus,textarea:focus{ outline:none; border-color:var(--gold)!important; box-shadow:0 0 0 3px rgba(212,175,55,.22); }
+::selection{ background:var(--rose); color:var(--ink); }
