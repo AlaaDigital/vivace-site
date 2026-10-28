@@ -287,18 +287,47 @@ export default function App() {
   };
   useEffect(() => { loadAll(); /* eslint-disable-next-line */ }, []);
 
+  const cleanBase64 = (obj: any): any => {
+    const str = JSON.stringify(obj);
+    if (str.includes("data:image")) {
+      // Replace all base64 with empty
+      let cleaned = str.replace(/data:image\/[^;]+;base64,[^"]+/g, "");
+      try { return JSON.parse(cleaned); } catch { return obj; }
+    }
+    return obj;
+  };
+
   const saveConfig = async (next: Config, silent = false) => {
     setSaving(true);
     try {
-      safeSave("vivace_config_v6", next);
-      const kvOk = await saveToKV(next);
+      // Auto-clean base64 to prevent KV failure
+      const hasBase64 = JSON.stringify(next).includes("data:image");
+      let toSave = next;
+      if (hasBase64) {
+        toSave = cleanBase64(next);
+        if (!silent) showToast("⚠️ تم حذف صور base64 قديمة كبيرة - استخدم روابط https:// فقط");
+      }
+      safeSave("vivace_config_v6", toSave);
+      const kvOk = await saveToKV(toSave);
       try {
-        if (configId) { await api("records.replace", { collection: "config", id: configId, value: next }); }
-        else { const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string }; setConfigId(created.id); }
+        if (configId) { await api("records.replace", { collection: "config", id: configId, value: toSave }); }
+        else { const created = (await api("records.create", { collection: "config", value: toSave, idempotency_key: "vivace-main-config" })) as { id: string }; setConfigId(created.id); }
       } catch {}
-      if (kvOk) { setStoreStatus("Cloudflare KV connected ✓ - يظهر للكل"); if (!silent) showToast("Saved to Cloudflare ✓ يظهر للكل"); }
-      else { setStoreStatus("Saved locally ✓"); if (!silent) showToast("Saved locally ✓"); }
-    } catch { safeSave("vivace_config_v6", next); showToast("Saved locally ✓"); }
+      if (kvOk) { 
+        setStoreStatus("Cloudflare KV connected ✓ - يظهر للكل"); 
+        if (!silent) showToast(hasBase64 ? "تم التنظيف والحفظ ✓" : "Saved to Cloudflare ✓ يظهر للكل"); 
+        // Force reload to verify
+        console.log("Saved to KV:", Object.keys(toSave).length, "keys");
+      }
+      else { 
+        setStoreStatus("Save failed - KV error"); 
+        if (!silent) showToast("❌ فشل الحفظ - تحقق من /api/config"); 
+      }
+    } catch (e) { 
+      console.error("Save error", e);
+      safeSave("vivace_config_v6", next); 
+      showToast("❌ خطأ في الحفظ: " + String(e)); 
+    }
     setSaving(false);
   };
 
