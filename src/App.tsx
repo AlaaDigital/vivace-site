@@ -31,6 +31,19 @@ type Config = {
   services: Service[];
   results: ResultItem[];
   posts: Post[];
+  comp: {
+    title: string; desc: string; endDate: string; prizeArt: string; prizeImage?: string; wins: string; winnerText: string; likeCount: number;
+    isActive: boolean;
+    requirements: CompetitionRequirement[];
+  };
+  seo: { title: string; description: string; keywords: string; canonical: string };
+  appearance: { defaultTheme: string; rose: string; gold: string };
+};
+  general: { whatsapp: string; instagram: string; facebook: string; snapchat: string; address: string };
+  hero: { kicker: string; titleA: string; titleAccent: string; titleB: string; subtitle: string; art: string; image?: string; statA: string; statALabel: string; statB: string; statBLabel: string; statC: string; statCLabel: string };
+  services: Service[];
+  results: ResultItem[];
+  posts: Post[];
   comp: { 
     title: string; desc: string; endDate: string; prizeArt: string; prizeImage?: string; wins: string; winnerText: string; likeCount: number;
     isActive: boolean;
