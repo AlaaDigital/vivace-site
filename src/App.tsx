@@ -141,11 +141,7 @@ async function saveToKV(data: any): Promise<boolean> {
   } catch { return false; }
 }
 
-function handleImageUpload(file: File, onDone: (dataUrl: string) => void) {
-  const reader = new FileReader();
-  reader.onload = () => onDone(reader.result as string);
-  reader.readAsDataURL(file);
-}
+// Image upload removed - using external URL only - no file upload
 async function api(action: string, args: Record<string, unknown>) {
   try {
     const res = await fetch("actions", {
@@ -687,9 +683,7 @@ export default function App() {
                       <div className="flex items-center gap-2 font-semibold text-sm"><Icon size={17} className="text-[var(--gold)]" /> {label}</div>
                       <div className="flex items-center justify-between mt-3">
                         <a href={url} target="_blank" rel="noopener" className="text-[11px] tracking-[0.14em] uppercase font-bold bg-[#1A1A1A] text-white px-3.5 py-2 rounded-full hover:opacity-85 transition-opacity" style={{ background: theme === "dark" ? "var(--gold)" : "#1A1A1A", color: theme === "dark" ? "#1A1A1A" : "#fff" }}>Open</a>
-                        <label className="flex items-center gap-2 text-xs text-[var(--muted)] cursor-pointer select-none">
-                          <input type="checkbox" checked={follows[key]} onChange={(e) => setFollows({ ...follows, [key]: e.target.checked })} className="w-4 h-4 accent-[#D4AF37]" /> Done
-                        </label>
+                        
                       </div>
                     </div>
                   ))}
@@ -988,16 +982,12 @@ export default function App() {
                       {r.image ? <img src={r.image} className="w-full h-full object-cover" /> : <div style={{ background: ART[r.art] || ART.rose }} className="flex items-center justify-center text-[9px] tracking-[0.2em] font-bold text-black/50">AFTER</div>}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
-                        <ImageIcon size={14} /> {r.beforeImage ? "تغيير Before" : "رفع Before"}
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, beforeImage: url }; const nxt = { ...config, results: n }; setConfig(nxt); saveConfig(nxt, true); }); }} />
-                      </label>
-                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
-                        <ImageIcon size={14} /> {r.image ? "تغيير After" : "رفع After"}
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.results]; n[i] = { ...r, image: url }; const nxt = { ...config, results: n }; setConfig(nxt); saveConfig(nxt, true); }); }} />
-                      </label>
+                      
+                      
                     </div>
                     <div className="grid sm:grid-cols-2 gap-3">
+                      <Field label="Before image URL (https://)"><input className={inputCls} value={r.beforeImage} placeholder="https://... رابط صورة قبل" onChange={(e) => { const n = [...config.results]; n[i] = { ...r, beforeImage: e.target.value }; update({ results: n }); }} onBlur={() => saveConfig(config, true)} /></Field>
+                      <Field label="After image URL (https://)"><input className={inputCls} value={r.image} placeholder="https://... رابط صورة بعد" onChange={(e) => { const n = [...config.results]; n[i] = { ...r, image: e.target.value }; update({ results: n }); }} onBlur={() => saveConfig(config, true)} /></Field>
                       <input className={inputCls} value={r.caption} placeholder="Caption" onChange={(e) => { const n = [...config.results]; n[i] = { ...r, caption: e.target.value }; update({ results: n }); }} onBlur={() => saveConfig(config, true)} />
                       <input className={inputCls} value={r.sub} placeholder="Sub-caption" onChange={(e) => { const n = [...config.results]; n[i] = { ...r, sub: e.target.value }; update({ results: n }); }} onBlur={() => saveConfig(config, true)} />
                     </div>
@@ -1023,14 +1013,12 @@ export default function App() {
                       <input type="date" className={inputCls} value={p.date} onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, date: e.target.value }; saveNow({ posts: n }); }} />
                       <select className={inputCls} value={p.art} onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, art: e.target.value }; saveNow({ posts: n }); }}>{ART_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
                     </div>
+                    <Field label="Post image URL (https://)"><input className={inputCls} value={p.image} placeholder="https://... رابط صورة المقال" onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, image: e.target.value }; update({ posts: n }); }} onBlur={() => saveConfig(config, true)} /></Field>
                     <textarea rows={2} className={inputCls} placeholder="Excerpt" value={p.excerpt} onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, excerpt: e.target.value }; update({ posts: n }); }} onBlur={() => saveConfig(config, true)} />
                     <textarea rows={5} className={inputCls} placeholder="Full article content" value={p.content} onChange={(e) => { const n = [...config.posts]; n[i] = { ...p, content: e.target.value }; update({ posts: n }); }} onBlur={() => saveConfig(config, true)} />
                     <div className="space-y-2">
                       {p.image && <img src={p.image} className="w-full h-32 object-cover rounded-xl" />}
-                      <label className="flex h-10 rounded-xl border border-dashed border-[var(--line)] items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]">
-                        <ImageIcon size={14} /> {p.image ? "تغيير صورة المقال" : "رفع صورة المقال"}
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, (url) => { const n = [...config.posts]; n[i] = { ...p, image: url }; const nxt = { ...config, posts: n }; setConfig(nxt); saveConfig(nxt, true); }); }} />
-                      </label>
+                      
                     </div>
                   </div>
                 ))}
@@ -1045,6 +1033,7 @@ export default function App() {
                   <Field label="End date & time"><input type="datetime-local" className={inputCls} value={config.comp.endDate} onChange={(e) => saveNow({ comp: { ...config.comp, endDate: e.target.value } })} /></Field>
                   <Field label="Prize artwork"><ArtSelect value={config.comp.prizeArt} onChange={(v) => saveNow({ comp: { ...config.comp, prizeArt: v } })} /></Field>
                 </div>
+                <Field label="Prize image URL (https://)"><input className={inputCls} value={config.comp.prizeImage} placeholder="https://... رابط صورة الجائزة" onChange={(e) => update({ comp: { ...config.comp, prizeImage: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="What you win (one prize per line)"><textarea rows={4} className={inputCls} value={config.comp.wins} onChange={(e) => update({ comp: { ...config.comp, wins: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="Winner announcement text"><textarea rows={2} className={inputCls} value={config.comp.winnerText} onChange={(e) => update({ comp: { ...config.comp, winnerText: e.target.value } })} onBlur={() => saveConfig(config, true)} /></Field>
                 <Field label="Starting like count"><input type="number" className={inputCls} value={config.comp.likeCount} onChange={(e) => update({ comp: { ...config.comp, likeCount: Number(e.target.value) || 0 } })} onBlur={() => saveConfig(config, true)} /></Field>
