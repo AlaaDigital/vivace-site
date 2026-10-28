@@ -119,163 +119,89 @@ const REVIEWS = [
 function safeSave(key: string, value: any) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 }
+
 function safeLoad(key: string, fallback: any) {
   try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch {}
   return fallback;
 }
+function safeSave(key: string, value: any) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
 const GITHUB_OWNER = (import.meta as any).env?.VITE_GITHUB_OWNER || "AlaaDigital";
 const GITHUB_REPO = (import.meta as any).env?.VITE_GITHUB_REPO || "vivace-site";
 const GITHUB_BRANCH = (import.meta as any).env?.VITE_GITHUB_BRANCH || "main";
 const GITHUB_TOKEN = (import.meta as any).env?.VITE_GITHUB_TOKEN || "";
 const GITHUB_CONFIG_PATH = (import.meta as any).env?.VITE_GITHUB_CONFIG_PATH || "public/config.json";
 const GITHUB_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_CONFIG_PATH}`;
+
+async function loadFromGitHub(): Promise<any | null> {
+  try {
+    const r = await fetch(GITHUB_RAW_URL + "?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return null;
+    const txt = await r.text();
+    if (!txt || txt.trim() === "{}" || txt.trim() === "" ) return null;
+    return JSON.parse(txt);
+  } catch { return null; }
+}
+
+async function saveToGitHub(data: any): Promise<boolean> {
+  if (!GITHUB_TOKEN) return false;
+  try {
+    const getUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_CONFIG_PATH}`;
+    let sha: string | undefined;
+    try {
+      const res = await fetch(getUrl + `?ref=${GITHUB_BRANCH}`, { headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" } });
+      if (res.ok) { const j = await res.json(); sha = j.sha; }
+    } catch {}
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const putRes = await fetch(getUrl, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify({ message: `Update config ${new Date().toISOString()}`, content, sha, branch: GITHUB_BRANCH }),
+    });
+    return putRes.ok;
+  } catch { return false; }
+}
+
 function handleImageUpload(file: File, onDone: (dataUrl: string) => void) {
+  if (file.size > 4 * 1024 * 1024) { alert("الصورة كبيرة، اختر أقل من 4MB"); return; }
   const reader = new FileReader();
   reader.onload = () => onDone(reader.result as string);
   reader.readAsDataURL(file);
 }
-async function api(action: string, args: Record<string, unknown>) {
-  try {
-    const res = await fetch("actions", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action, args }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || (data as { error?: string }).error) {
-      if (res.status === 405 || res.status === 404) {
-        // Static Pages fallback - use localStorage
-        const col = (args as any).collection;
-        if (action === "records.list") {
-          if (col === "config") {
-            const cfg = safeLoad("vivace_config", null);
-            return cfg ? { records: [{ id: "local-config", value: cfg }] } : { records: [] };
-          }
-          if (col === "bookings") {
-            const bks = safeLoad("vivace_bookings", []);
-            return { records: bks.map((v: any, i: number) => ({ id: v.id || `bk-${i}`, value: v })) };
-          }
-          if (col === "entries") {
-            const ents = safeLoad("vivace_entries", []);
-            return { records: ents.map((v: any, i: number) => ({ id: v.id || `en-${i}`, value: v })) };
-          }
-        }
-        if (action === "records.create" || action === "records.replace") {
-          const c = (args as any).collection;
-          const val = (args as any).value;
-          if (c === "config") safeSave("vivace_config", val);
-          if (c === "bookings") { const all = safeLoad("vivace_bookings", []); all.push(val); safeSave("vivace_bookings", all); }
-          if (c === "entries") { const all = safeLoad("vivace_entries", []); all.push(val); safeSave("vivace_entries", all); }
-          return { id: `local-${Date.now()}` };
-        }
-        if (action === "records.delete") return {};
-        throw new Error("OFFLINE_MODE");
-      }
-      throw new Error((data as { error?: string }).error || `Request failed (${res.status})`);
-    }
-    return (data as { data: unknown }).data;
-  } catch (e) {
-    const msg = String(e);
-    if (msg.includes("OFFLINE_MODE") || msg.includes("Failed to fetch") || msg.includes("405")) {
-      const col = (args as any)?.collection;
-      if (action === "records.list" && col === "config") {
-        const cfg = safeLoad("vivace_config", null);
-        return cfg ? { records: [{ id: "local-config", value: cfg }] } : { records: [] };
-      }
-      if (action === "records.create" || action === "records.replace") {
-        const c = (args as any)?.collection;
-        const val = (args as any)?.value;
-        if (c === "config") safeSave("vivace_config", val);
-        return { id: `local-${Date.now()}` };
-      }
-      if (action === "records.list") return { records: [] };
-      return { id: `local-${Date.now()}` };
-    }
-    throw e;
-  }
-}
 
-const waLink = (number: string, text: string) =>
-  `https://wa.me/${number.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
-
-const GITHUB_RAW_CONFIG_URL = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/vivace-config.json";
-
-/* --------------------------------- app ------------------------------------ */
-export default function App() {
-  const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
-  const [configId, setConfigId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [themeTouched, setThemeTouched] = useState(false);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [storeStatus, setStoreStatus] = useState("Connecting to the Vivace studio database…");
-  const [toast, setToast] = useState<string | null>(null);
-  const [barClosed, setBarClosed] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const [activePost, setActivePost] = useState<Post | null>(null);
-
-  // competition state
-  const [follows, setFollows] = useState({ ig: false, fb: false, snap: false });
-  const [liked, setLiked] = useState(false);
-  const [entryForm, setEntryForm] = useState({ name: "", handle: "" });
-  const [entered, setEntered] = useState(false);
-  const [now, setNow] = useState(Date.now());
-
-  // booking form
-  const [bookForm, setBookForm] = useState({ name: "", service: "Signature Lip Filler", phone: "", date: "" });
-  const [bookedMsg, setBookedMsg] = useState<string | null>(null);
-
-  // admin
-  const [adminOpen, setAdminOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState(false);
-  const [tab, setTab] = useState("dashboard");
-  const [saving, setSaving] = useState(false);
-
-  const toastTimer = useRef<number | undefined>(undefined);
-  const showToast = (msg: string) => {
-    setToast(msg);
-    window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), 4200);
-  };
-
-  /* load data */
-  const loadAll = async () => {
-    try {
-      const cfgRes = (await api("records.list", { collection: "config", limit: 1 })) as { records: { id: string; value: Config }[] };
-      if (cfgRes.records.length > 0) {
-        const merged = { ...DEFAULT_CONFIG, ...cfgRes.records[0].value };
-        setConfig(merged);
-        setConfigId(cfgRes.records[0].id);
-        if (!themeTouched) setTheme(merged.appearance.defaultTheme === "dark" ? "dark" : "light");
-      }
-      const bk = (await api("records.list", { collection: "bookings", limit: 100 })) as { records: { id: string; value: Booking }[] };
-      setBookings(bk.records.map((r) => ({ ...r.value, id: r.id })));
-      const en = (await api("records.list", { collection: "entries", limit: 100 })) as { records: { id: string; value: Entry }[] };
-      setEntries(en.records.map((r) => ({ ...r.value, id: r.id })).reverse());
-      setStoreStatus("Connected — all edits save to the studio database and appear for every visitor.");
-    } catch {
-      setStoreStatus("Studio database is warming up — you are viewing the latest published content. Saving will be available in a moment.");
-    }
-  };
-  useEffect(() => { loadAll(); /* eslint-disable-next-line */ }, []);
-
-  const saveConfig = async (next: Config, silent = false) => {
+const saveConfig = async (next: Config, silent = false) => {
     setSaving(true);
     try {
+      safeSave("vivace_config_v6", next);
       safeSave("vivace_config", next);
+      // Save to GitHub if token exists
+      let ghOk = false;
+      if (GITHUB_TOKEN) {
+        ghOk = await saveToGitHub(next);
+      }
+      // Also try records API fallback
       try {
         if (configId) {
-          await api("records.replace", { collection: "config", id: configId, value: next });
+          await fetch("actions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "records.replace", args: { collection: "config", id: configId, value: next } }) });
         } else {
-          const created = (await api("records.create", { collection: "config", value: next, idempotency_key: "vivace-main-config" })) as { id: string };
-          setConfigId(created.id);
+          const res = await fetch("actions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "records.create", args: { collection: "config", value: next, idempotency_key: "vivace-main-config" } }) });
+          const j = await res.json().catch(()=>({}));
+          if (j && (j as any).id) setConfigId((j as any).id);
         }
       } catch {}
-      if (!silent) showToast("Saved ✓ تم الحفظ");
+      if (ghOk) {
+        setStoreStatus("GitHub connected ✓ - يظهر للكل");
+        if (!silent) showToast("Saved to GitHub ✓ يظهر للكل");
+      } else if (GITHUB_TOKEN) {
+        if (!silent) showToast("Saved ✓ محليا - خطأ GitHub");
+      } else {
+        setStoreStatus("Database connected (local) - أضف Token للظهور للكل");
+        if (!silent) showToast("Saved locally ✓");
+      }
     } catch (e) {
-      safeSave("vivace_config", next);
+      safeSave("vivace_config_v6", next);
       showToast("Saved locally ✓");
     }
     setSaving(false);
