@@ -210,7 +210,8 @@ async function api(action: string, args: Record<string, unknown>) {
 const waLink = (number: string, text: string) =>
   `https://wa.me/${number.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
 
-const "" = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/vivace-config.json";
+// fixed - removed broken GitHub line
+
 
 /* --------------------------------- app ------------------------------------ */
 export default function App() {
