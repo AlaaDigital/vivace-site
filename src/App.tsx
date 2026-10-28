@@ -1065,24 +1065,6 @@ function SectionHead({ kicker, title, accent, sub }: { kicker: string; title: st
   );
 }
 
-
-function ImageUpload({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="space-y-2">
-      <label className="block text-[11px] font-semibold tracking-[0.14em] uppercase text-[var(--muted)]">{label}</label>
-      {value && value.startsWith("data:") && <img src={value} alt="preview" className="w-full h-[120px] object-cover rounded-xl border" style={{ borderColor: "var(--line)" }} />}
-      {value && !value.startsWith("data:") && ART[value] && <div className="w-full h-[120px] rounded-xl" style={{ background: ART[value] }} />}
-      <div className="flex gap-2">
-        <label className="flex-1 h-10 rounded-xl border border-dashed flex items-center justify-center gap-2 text-xs cursor-pointer hover:border-[var(--gold)]" style={{ borderColor: "var(--line)" }}>
-          <Upload size={14} /> {value ? "تغيير الصورة" : "رفع صورة"}
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file, onChange); }} />
-        </label>
-        {value && <button type="button" onClick={() => onChange("")} className="h-10 px-3 rounded-xl border text-xs" style={{ borderColor: "var(--line)" }}><Trash2 size={14} /></button>}
-      </div>
-    </div>
-  );
-}
-
 function AdminCard({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="rounded-[24px] bg-[var(--surface)] border border-[var(--line)] shadow-[var(--card-shadow)] p-5 sm:p-7 space-y-5">
